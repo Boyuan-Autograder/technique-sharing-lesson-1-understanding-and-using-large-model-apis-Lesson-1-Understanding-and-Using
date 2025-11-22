@@ -9,31 +9,31 @@ TOKEN = os.getenv("TOKEN")
 def chat_stream(user_text):
     # 如果你是用的是硅基流动，可以直接使用下面的URL
     # url = "https://api.siliconflow.cn/v1/chat/completions"
-    url = ____TO BE FILLED____
+    url = "https://api.gptsapi.net/v1/chat/completions"
     payload = {
-        "model": "____TO BE FILLED____",
-        "messages": [{"role": "user", ____TO BE FILLED____}],
-        "stream": ____TO BE FILLED____
+        "model": "gemini-2.5-flash",
+        "messages": [{"role": "user", "content": user_text}],
+        "stream": True
     }
     headers = {
-        "Authorization": ____TO BE FILLED____,
-        "Content-Type": ____TO BE FILLED____
+        "Authorization": f"Bearer {TOKEN}",
+        "Content-Type": "application/json"
     }
 
-    with requests.____TO BE FILLED____(url, headers=headers, json=payload, stream=____TO BE FILLED____) as r:
+    with requests.post(url, headers=headers, json=payload, stream=True) as r:
         for line in r.iter_lines():
             if not line:
                 continue
             decoded = line.decode("utf-8").strip()
-            if decoded == ____TO BE FILLED____:
+            if decoded == "data: [DONE]":
                 break
-            if decoded.startswith(____TO BE FILLED____):
+            if decoded.startswith("data: "):
                 try:
-                    data_json = json.loads(decoded[len(____TO BE FILLED____):])
-                    choices = data_json.get(____TO BE FILLED____, [])
+                    data_json = json.loads(decoded[len("data: "):])
+                    choices = data_json.get("choices", [])
                     for choice in choices:
-                        delta = choice.get(____TO BE FILLED____, {})
-                        text = delta.get(____TO BE FILLED____)
+                        delta = choice.get("delta", {})
+                        text = delta.get("content")
                         if text:
                             print(text, end="", flush=True)
                 except json.JSONDecodeError:
